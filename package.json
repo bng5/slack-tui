@@ -1,0 +1,33 @@
+{
+  "name": "slack-tui",
+  "version": "0.0.1",
+  "description": "Text-based user interface client for Slack.",
+  "main": "index.js",
+  "bin": {
+    "slacktui": "bin/slacktui.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:bng5/slack-tui.git"
+  },
+  "keywords": [
+    "terminal",
+    "slack"
+  ],
+  "author": "Pablo Bangueses",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bng5/slack-tui/issues"
+  },
+  "homepage": "https://github.com/bng5/slack-tui",
+  "dependencies": {
+    "blessed": "^0.1.61",
+    "figures": "^1.3.5",
+    "sqlite3": "^3.0.8",
+    "websocket": "^1.0.19"
+  },
+  "devDependencies": {}
+}
