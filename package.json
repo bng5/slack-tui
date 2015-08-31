@@ -29,5 +29,7 @@
     "sqlite3": "^3.0.8",
     "websocket": "^1.0.19"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "underscore": "^1.8.3"
+  }
 }
