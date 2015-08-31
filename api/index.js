@@ -34,24 +34,26 @@ Api.prototype.getTeamInfo = function(token, callback) {
 
 function read(body, callback) {
     var data = JSON.parse(body);
-    data.users = _.indexBy(_.reject(data.users, function(user) {
-        return user.deleted;
-    }), function(user) {
-        user.search = ' '+user.name+' '+user.profile.real_name+' '+user.profile.real_name_normalized;
-        return user.id;
-    });
+    data.users = _.chain(data.users)
+        .reject('deleted')
+        .indexBy('id')
+        .each(function(user) {
+            user.search = ' '+user.name+' '+user.profile.real_name+' '+user.profile.real_name_normalized;
+        })
+        .value();
     if(data.groups) {
         data.channels = data.channels.concat(data.groups);
         delete data.groups;
     }
-    data.channels = _.indexBy(_.reject(data.channels, function(channel) {
-        return channel.is_archived;
-    }), function(channel) {
-        if(channel.members) {
-            channel.members = _.intersection(channel.members, this);
-        }
-        return channel.id;
-    }, _.keys(data.users));
+    data.channels = _.chain(data.channels)
+        .reject('is_archived')
+        .indexBy('id')
+        .each(function(channel) {
+            if(channel.members) {
+                channel.members = _.intersection(channel.members, this);
+            }
+        }, _.keys(data.users))
+        .value();
     callback(data);
 }
 
