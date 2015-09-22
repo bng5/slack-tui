@@ -27,9 +27,7 @@
     "blessed": "^0.1.61",
     "figures": "^1.3.5",
     "sqlite3": "^3.0.8",
-    "websocket": "^1.0.19"
-  },
-  "devDependencies": {
+    "websocket": "^1.0.19",
     "underscore": "^1.8.3"
   }
 }

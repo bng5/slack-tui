@@ -272,8 +272,8 @@ Ui.prototype.addMessage = function(message) {
     this.contentArea.append(text);
      */
     this.screen.render();
-    console.error('Scroll: '+this.contentArea.getScroll());
-    this.contentArea.scrollTo(this.contentArea.getScroll());
+    //console.error('Scroll: '+this.contentArea.getScroll());
+    //this.contentArea.scrollTo(this.contentArea.getScroll());
     this.screen.render();
 };
 Ui.prototype.addMessages = function(messages) {

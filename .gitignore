@@ -1,2 +1,6 @@
 build/Release
 node_modules
+storage
+makefile
+mock
+profiles.js
