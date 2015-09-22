@@ -4,32 +4,51 @@ var util            = require('util');
 var EventEmitter    = require('events').EventEmitter;
 var _               = require('underscore');
 
-function Api() {
-
+function Api(token) {
+    this.token = token;
 }
 
 util.inherits(Api, EventEmitter);
 
 Api.prototype.getTeamInfo = function(token, callback) {
+    _request(callback, 'GET', '/api/rtm.start', {token: this.token});
+}
+
+Api.prototype.getChannelHilstory = function(callback, channel) {
+    _request(callback, 'GET', '/api/channels.history', {"channel": channel, token: this.token});
+}
+
+function _request(callback, method, path, params) {
+    path += '?'+serialize(params);
     var options = {
         hostname: 'slack.com',
         port: 443,
-        path: '/api/rtm.start?token='+token,
-        method: 'GET'
+        "path": path,
+        "method": method
     };
     var req = https.request(options, function(res) {
-        var body = '';
+        var spool = '';
         res.on('data', function(chunk) {
-            body += chunk;
+            spool += chunk;
         });
         res.on('end', function() {
-            read(body, callback);
+            var data = JSON.parse(spool);
+            callback(data);
         });
     });
     req.end();
     req.on('error', function(e) {
         console.error(e);
     });
+}
+
+function serialize(obj) {
+    var str = [];
+    for(var p in obj)
+    if (obj.hasOwnProperty(p)) {
+        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+    }
+    return str.join("&");
 }
 
 function read(body, callback) {
@@ -45,6 +64,10 @@ function read(body, callback) {
         data.channels = data.channels.concat(data.groups);
         delete data.groups;
     }
+    if(data.ims) {
+        data.channels = data.channels.concat(data.ims);
+        delete data.ims;
+    }
     data.channels = _.chain(data.channels)
         .reject('is_archived')
         .indexBy('id')
@@ -59,26 +82,38 @@ function read(body, callback) {
 
 Api.prototype.rtmConnect = function(wssUrl) {
     var wss = new WebSocketClient();
-    wss.on('connectFailed', function(error) {
-        console.log('Connect Error: ' + error.toString());
+    wss.on('connectFailed', function(o_O) {
+        self.emit('rtm:connectFailed', o_O);
     });
     var self = this;
     wss.on('connect', function(connection) {
-        connection.on('error', function(error) {
-            console.log("Connection Error: " + error.toString());
+        var ping = {
+            timer: null,
+            increment: 1
+        };
+        connection.on('error', function(o_O) {
+            console.error(o_O);
+            self.emit('rtm:error', o_O);
         });
         connection.on('close', function() {
-            console.log('echo-protocol Connection Closed');
+            console.error(o_O);
+            self.emit('rtm:close');
         });
         connection.on('message', function(message) {
-            if (message.type === 'utf8') {
-                var data = JSON.parse(message.utf8Data);
-                self.emit(data.type, data);
-            }
-            else {
-                console.log('No es UTF-8. So?');
-            }
+            var data = JSON.parse(message.utf8Data);
+            self.emit('rtm:message', data);
         });
+        self.emit('rtm:connect');
+        ping.timer = setInterval(function(connection, ping) {
+            // this intervalObject
+            connection.sendUTF(JSON.stringify({
+                type: "ping",
+                id: ping.increment,
+                time: (new Date).getTime()
+            }));
+            ping.increment++;
+        }, 10000, connection, ping);
+        //clearInterval(intervalObject)
     });
     wss.connect(wssUrl);
 }
